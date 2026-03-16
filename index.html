@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Source Navigator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+    
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-tertiary: rgba(255, 255, 255, 0.5);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.15);
+      /* 主色调 - 低饱和度紫蓝渐变系 */
+      --accent-blue: #6b8cce;
+      --accent-purple: #9b8cbe;
+      --accent-pink: #b8899e;
+      --accent-cyan: #7ab0b8;
+      --accent-green: #7eb89e;
+      --accent-orange: #c9a87a;
+      --accent-red: #c08888;
+      /* 图标渐变色 - 统一的灰紫色调 */
+      --icon-1: #5a6a8a;
+      --icon-2: #6a7a9a;
+      --icon-3: #7a8aaa;
+      --icon-4: #8a9aba;
+      --icon-5: #9aaaca;
+      --icon-6: #8898b8;
+      --icon-7: #7888a8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                   "Microsoft YaHei", sans-serif;
+      background: 
+        linear-gradient(180deg, rgba(5, 8, 15, 0.95) 0%, rgba(10, 21, 37, 0.9) 50%, rgba(13, 26, 45, 0.85) 100%),
+        url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1920&q=80') center/cover no-repeat fixed;
+      min-height: 100vh;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+
+    .bg-gradient {
+      display: none;
+    }
+
+    .grid-pattern {
+      display: none;
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+    }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+    }
+    .top-nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .top-nav-inner::-webkit-scrollbar { display: none; }
+    .nav-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .nav-tab:hover {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+    .nav-tab.active {
+      background: linear-gradient(135deg, #5a6a8a, #6a7a9a);
+      color: #fff;
+      border-color: #6a7a9a;
+    }
+    .nav-tab .icon { font-size: 14px; }
+    .nav-tab .burn-tag {
+      font-size: 10px;
+      margin-left: 2px;
+    }
+    .nav-logo {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-right: 12px;
+      white-space: nowrap;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .header {
+      position: relative;
+      padding: 50px 40px 40px;
+      text-align: center;
+      overflow: hidden;
+      background: 
+        linear-gradient(180deg, rgba(5, 10, 20, 0.3) 0%, rgba(5, 10, 20, 0.9) 100%),
+        url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80') center top/cover no-repeat;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-purple);
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .header-badge .dot {
+      width: 6px; height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    .header h1 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 50%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+    .header p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .header .stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 24px;
+    }
+    .stat-item { text-align: center; }
+    .stat-number {
+      font-size: 26px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+    }
+    .quick-nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 50px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .quick-nav a:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(120, 140, 170, 0.5);
+      color: var(--text-primary);
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+
+    .section { margin-top: 40px; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .section-icon {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    /* 板块图标 - 黑色背景 20%透明度 */
+    .section-icon.ic-x { background: rgba(0, 0, 0, 0.2); }
+    .section-icon.ic-wx { background: rgba(0, 0, 0, 0.2); }
+    .section-icon.ic-nl { background: rgba(0, 0, 0, 0.2); }
+    .section-icon.ic-pod { background: rgba(0, 0, 0, 0.2); }
+    .section-icon.ic-yt { background: rgba(0, 0, 0, 0.2); }
+    .section-icon.ic-learn { background: rgba(0, 0, 0, 0.2); }
+    .section-icon.ic-tool { background: rgba(0, 0, 0, 0.2); }
+    
+    .section-title h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      flex: 1;
+    }
+    .section-title .count {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+    }
+
+    a.card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 22px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+    a.card:hover {
+      transform: translateY(-3px);
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.25);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .card-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .card-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+      margin-bottom: 3px;
+    }
+    .card-sub {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.4;
+    }
+
+    /* 卡片图标 - 黑色背景 20%透明度 */
+    .ic-x { background: rgba(0, 0, 0, 0.2); }
+    .ic-wx { background: rgba(0, 0, 0, 0.2); }
+    .ic-nl { background: rgba(0, 0, 0, 0.2); }
+    .ic-pod { background: rgba(0, 0, 0, 0.2); }
+    .ic-yt { background: rgba(0, 0, 0, 0.2); }
+    .ic-brief { background: rgba(180, 150, 255, 0.2); }
+    .ic-learn { background: rgba(0, 0, 0, 0.2); }
+    .ic-tool { background: rgba(0, 0, 0, 0.2); }
+
+    a.card.brief-card {
+      background: linear-gradient(135deg, rgba(100, 120, 150, 0.1), rgba(120, 110, 140, 0.1));
+      border-color: rgba(140, 150, 170, 0.25);
+    }
+    a.card.brief-card:hover {
+      border-color: rgba(140, 150, 170, 0.45);
+    }
+    .brief-badge {
+      position: absolute;
+      top: 10px; right: 10px;
+      padding: 3px 8px;
+      background: rgba(120, 140, 170, 0.2);
+      border: 1px solid rgba(120, 140, 170, 0.3);
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 600;
+      color: #a0b0c8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 32px 24px;
+      border-top: 1px solid var(--border-color);
+      margin-top: 50px;
+    }
+    .footer p {
+      color: var(--text-tertiary);
+      font-size: 12px;
+    }
+
+    /* Brief View */
+    .brief-header {
+      position: relative;
+      padding: 40px 40px 32px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .brief-header-content {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .brief-header .header-badge {
+      margin-bottom: 14px;
+    }
+    .brief-header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .brief-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .brief-header .date {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .brief-header .date::before { content: '📅 '; }
+
+    /* Source Links */
+    .source-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .source-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    .source-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(140, 150, 170, 0.5);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+    }
+
+    .brief-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    /* Generate Button */
+    .generate-section {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .btn-generate {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+    }
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
+    }
+    .btn-generate:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-generate .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+    .btn-generate.loading .spinner { display: block; }
+    .btn-generate.loading .btn-text { display: none; }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-text {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* Content Display */
+    .content-display {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      font-size: 14px;
+      line-height: 1.9;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      min-height: 200px;
+    }
+    .content-display.empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-tertiary);
+      font-style: italic;
+    }
+    .content-display h3, .content-display strong {
+      color: var(--text-primary);
+    }
+
+    /* Streaming cursor */
+    .streaming::after {
+      content: '▋';
+      animation: blink 0.8s infinite;
+      color: var(--accent-cyan);
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .brief-footer {
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid var(--border-color);
+      margin-top: 20px;
+    }
+    .brief-footer p {
+      color: var(--text-tertiary);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    /* Back to Home Button */
+    .btn-back-home {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 25px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-back-home:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(140, 150, 170, 0.5);
+      color: var(--text-primary);
+      transform: translateX(-4px);
+    }
+
+    /* Theme colors - 低饱和度统一色系，50%透明度 */
+    .brief-wx .btn-generate { background: linear-gradient(135deg, rgba(90, 122, 138, 0.5), rgba(74, 106, 122, 0.5)); box-shadow: 0 4px 20px rgba(90, 122, 138, 0.25); }
+    .brief-wx .btn-generate:hover { box-shadow: 0 8px 30px rgba(90, 122, 138, 0.35); }
+    .brief-nl .btn-generate { background: linear-gradient(135deg, rgba(106, 122, 138, 0.5), rgba(90, 106, 122, 0.5)); box-shadow: 0 4px 20px rgba(106, 122, 138, 0.25); }
+    .brief-nl .btn-generate:hover { box-shadow: 0 8px 30px rgba(106, 122, 138, 0.35); }
+    .brief-pod .btn-generate { background: linear-gradient(135deg, rgba(122, 122, 154, 0.5), rgba(106, 106, 138, 0.5)); box-shadow: 0 4px 20px rgba(122, 122, 154, 0.25); }
+    .brief-pod .btn-generate:hover { box-shadow: 0 8px 30px rgba(122, 122, 154, 0.35); }
+    .brief-yt .btn-generate { background: linear-gradient(135deg, rgba(138, 122, 138, 0.5), rgba(122, 106, 122, 0.5)); box-shadow: 0 4px 20px rgba(138, 122, 138, 0.25); }
+    .brief-yt .btn-generate:hover { box-shadow: 0 8px 30px rgba(138, 122, 138, 0.35); }
+
+    @media (max-width: 768px) {
+      .top-nav { padding: 10px 16px; }
+      .nav-logo { font-size: 14px; margin-right: 8px; }
+      .nav-tab { padding: 6px 12px; font-size: 12px; }
+      .header { padding: 30px 20px; }
+      .header h1 { font-size: 26px; }
+      .header .stats { gap: 16px; }
+      .stat-number { font-size: 20px; }
+      .quick-nav { gap: 8px; }
+      .quick-nav a { padding: 6px 10px; font-size: 11px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+      a.card { padding: 16px 14px; }
+      .card-icon { width: 36px; height: 36px; font-size: 16px; }
+      .card-name { font-size: 12px; }
+      .brief-header { padding: 24px 20px; }
+      .brief-header h1 { font-size: 24px; }
+      .brief-container { padding: 20px 16px 40px; }
+      .btn-generate { padding: 14px 24px; font-size: 14px; }
+      .content-display { padding: 20px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+<div class="grid-pattern"></div>
+
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <span class="nav-logo">AI导航</span>
+    <button class="nav-tab active" data-view="main">首页</button>
+    <button class="nav-tab" data-view="brief-wx">公众号总结</button>
+    <button class="nav-tab" data-view="brief-nl">Newsletter总结</button>
+    <button class="nav-tab" data-view="brief-pod">播客总结</button>
+    <button class="nav-tab" data-view="brief-yt">YouTube总结</button>
+  </div>
+</nav>
+
+<!-- MAIN VIEW -->
+<div id="view-main" class="view active">
+  <div class="header">
+    <div class="header-badge">
+      <span class="dot"></span>
+      实时更新
+    </div>
+    <h1>AI Source Navigator</h1>
+    <div class="stats">
+      <div class="stat-item" style="flex: 1; max-width: 100%;">
+        <div class="stat-label" style="font-size: 16px; font-weight: 700; letter-spacing: 1px; text-transform: none;">Follow the builders, become the influencers.</div>
+      </div>
+      <div class="stat-item" style="display: none;">
+        <div class="stat-number">7</div>
+        <div class="stat-label">分类</div>
+      </div>
+      <div class="stat-item" style="display: none;">
+        <div class="stat-number">4</div>
+        <div class="stat-label">Daily Brief</div>
+      </div>
+    </div>
+    <div class="quick-nav">
+      <a href="#section-x">Twitter</a>
+      <a href="#section-wx">公众号</a>
+      <a href="#section-nl">Newsletter</a>
+      <a href="#section-pod">播客</a>
+      <a href="#section-yt">YouTube</a>
+      <a href="#section-learn">深度学习</a>
+      <a href="#section-tool">工具箱</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Twitter / X -->
+    <div class="section" id="section-x">
+      <div class="section-title">
+        <div class="section-icon ic-x">𝕏</div>
+        <h2>Twitter / X</h2>
+        <span class="count">10</span>
+      </div>
+      <div class="grid">
+        <a class="card" href="https://x.com/karpathy" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Andrej Karpathy</div><div class="card-sub">OpenAI创始成员·前特斯拉AI总监</div></div></div></a>
+        <a class="card" href="https://x.com/sama" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Sam Altman</div><div class="card-sub">OpenAI CEO·ChatGPT缔造者</div></div></div></a>
+        <a class="card" href="https://x.com/gdb" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Greg Brockman</div><div class="card-sub">OpenAI联创兼总裁</div></div></div></a>
+        <a class="card" href="https://x.com/geoffreyhinton" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Geoffrey Hinton</div><div class="card-sub">深度学习之父·图灵奖得主</div></div></div></a>
+        <a class="card" href="https://x.com/zarazhangrui" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Zara Zhang</div><div class="card-sub">硅谷从业者·风向敏锐者</div></div></div></a>
+        <a class="card" href="https://x.com/andrewyng" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Andrew Ng 吴恩达</div><div class="card-sub">机器学习教父</div></div></div></a>
+        <a class="card" href="https://x.com/DarioAmodei" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Dario Amodei</div><div class="card-sub">Anthropic CEO</div></div></div></a>
+        <a class="card" href="https://x.com/ch402" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Chris Olah</div><div class="card-sub">Anthropic联创</div></div></div></a>
+        <a class="card" href="https://x.com/AnthropicAI" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Anthropic</div><div class="card-sub">Claude创造者</div></div></div></a>
+        <a class="card" href="https://x.com/OpenAI" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">OpenAI</div><div class="card-sub">ChatGPT缔造者</div></div></div></a>
+        <a class="card" href="https://x.com/midjourney" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Midjourney</div><div class="card-sub">AI绘画王者</div></div></div></a>
+      </div>
+    </div>
+
+    <!-- 微信公众号 -->
+    <div class="section" id="section-wx">
+      <div class="section-title">
+        <div class="section-icon ic-wx">W</div>
+        <h2>微信公众号</h2>
+        <span class="count">7</span>
+      </div>
+      <div class="grid">
+        <a class="card" href="https://www.jiqizhixin.com/" target="_blank"><div class="card-header"><div class="card-icon ic-wx">W</div><div><div class="card-name">机器之心</div><div class="card-sub">AI 资讯</div></div></div></a>
+        <a class="card" href="https://www.qbitai.com/" target="_blank"><div class="card-header"><div class="card-icon ic-wx">W</div><div><div class="card-name">量子位</div><div class="card-sub">AI 资讯</div></div></div></a>
+        <a class="card" href="https://weixin.sogou.com/weixin?type=1&query=新智元" target="_blank"><div class="card-header"><div class="card-icon ic-wx">W</div><div><div class="card-name">新智元</div><div class="card-sub">AI 资讯</div></div></div></a>
+        <a class="card" href="https://weixin.sogou.com/weixin?type=1&query=数字生命卡兹克" target="_blank"><div class="card-header"><div class="card-icon ic-wx">W</div><div><div class="card-name">数字生命卡兹克</div><div class="card-sub">AI 资讯</div></div></div></a>
+        <a class="card" href="https://hellogithub.com/" target="_blank"><div class="card-header"><div class="card-icon ic-wx">W</div><div><div class="card-name">HelloGitHub</div><div class="card-sub">开源项目</div></div></div></a>
+        <a class="card" href="weixin://subscriptionPage" target="_blank"><div class="card-header"><div class="card-icon ic-wx">W</div><div><div class="card-name">微信订阅号</div><div class="card-sub">公众号订阅</div></div></div></a>
+        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-wx');return false;"><span class="brief-badge">每日限1次</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">当日总结</div><div class="card-sub">AI 自动生成 · 每日限1次</div></div></div></a>
+      </div>
+    </div>
+
+    <!-- Newsletter -->
+    <div class="section" id="section-nl">
+      <div class="section-title">
+        <div class="section-icon ic-nl">N</div>
+        <h2>Newsletter</h2>
+        <span class="count">5</span>
+      </div>
+      <div class="grid">
+        <a class="card" href="https://www.therundown.ai/" target="_blank"><div class="card-header"><div class="card-icon ic-nl">N</div><div><div class="card-name">The Rundown AI</div><div class="card-sub">每日 AI 简报</div></div></div></a>
+        <a class="card" href="https://every.to/" target="_blank"><div class="card-header"><div class="card-icon ic-nl">N</div><div><div class="card-name">Every</div><div class="card-sub">AI & 商业</div></div></div></a>
+        <a class="card" href="https://www.lennysnewsletter.com/" target="_blank"><div class="card-header"><div class="card-icon ic-nl">N</div><div><div class="card-name">Lenny's Newsletter</div><div class="card-sub">产品 & 增长</div></div></div></a>
+        <a class="card" href="feedly://" target="_blank"><div class="card-header"><div class="card-icon ic-nl">N</div><div><div class="card-name">Feedly</div><div class="card-sub">打开 App</div></div></div></a>
+        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-nl');return false;"><span class="brief-badge">每日限1次</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">当日总结</div><div class="card-sub">AI 自动生成 · 每日限1次</div></div></div></a>
+      </div>
+    </div>
+
+    <!-- 播客 -->
+    <div class="section" id="section-pod">
+      <div class="section-title">
+        <div class="section-icon ic-pod">P</div>
+        <h2>播客</h2>
+        <span class="count">5</span>
+      </div>
+      <div class="grid">
+        <a class="card" href="https://podcasts.apple.com/us/podcast/%E7%A1%85%E8%B0%B7101/id1498541229" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">硅谷101</div><div class="card-sub">中文 · 硅谷科技</div></div></div></a>
+        <a class="card" href="https://podcasts.apple.com/us/podcast/%E6%99%9A%E7%82%B9%E8%81%8A-latetalk/id1564877433" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">晚点聊 Late Talk</div><div class="card-sub">中文 · 科技深度</div></div></div></a>
+        <a class="card" href="https://podcasts.apple.com/us/podcast/ai%E7%82%BC%E9%87%91%E6%9C%AF/id1671502201" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">AI 炼金术</div><div class="card-sub">中文 · AI 实践</div></div></div></a>
+        <a class="card" href="https://podcasts.apple.com/us/podcast/%E5%8D%81%E5%AD%97%E8%B7%AF%E5%8F%A3crossing/id1729552193" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">十字路口</div><div class="card-sub">中文 · 科技访谈</div></div></div></a>
+        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-pod');return false;"><span class="brief-badge">每日限1次</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">当日总结</div><div class="card-sub">AI 自动生成 · 每日限1次</div></div></div></a>
+      </div>
+    </div>
+
+    <!-- YouTube -->
+    <div class="section" id="section-yt">
+      <div class="section-title">
+        <div class="section-icon ic-yt">Y</div>
+        <h2>YouTube</h2>
+        <span class="count">5</span>
+      </div>
+      <div class="grid">
+        <a class="card" href="https://www.youtube.com/@AndrejKarpathy" target="_blank"><div class="card-header"><div class="card-icon ic-yt">Y</div><div><div class="card-name">Andrej Karpathy</div><div class="card-sub">AI 研究员</div></div></div></a>
+        <a class="card" href="https://www.youtube.com/@TwoMinutePapers" target="_blank"><div class="card-header"><div class="card-icon ic-yt">Y</div><div><div class="card-name">Two Minute Papers</div><div class="card-sub">论文速递</div></div></div></a>
+        <a class="card" href="https://www.youtube.com/@lexfridman" target="_blank"><div class="card-header"><div class="card-icon ic-yt">Y</div><div><div class="card-name">Lex Fridman</div><div class="card-sub">AI 访谈</div></div></div></a>
+        <a class="card" href="https://www.youtube.com/@LennysPodcast" target="_blank"><div class="card-header"><div class="card-icon ic-yt">Y</div><div><div class="card-name">Lenny's Podcast</div><div class="card-sub">产品 & 增长</div></div></div></a>
+        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-yt');return false;"><span class="brief-badge">每日限1次</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">当日总结</div><div class="card-sub">AI 自动生成 · 每日限1次</div></div></div></a>
+      </div>
+    </div>
+
+    <!-- AI 深度学习 -->
+    <div class="section" id="section-learn">
+      <div class="section-title">
+        <div class="section-icon ic-learn">L</div>
+        <h2>AI 深度学习</h2>
+        <span class="count">5</span>
+      </div>
+      <div class="grid">
+        <a class="card" href="https://www.deeplearning.ai/courses/" target="_blank"><div class="card-header"><div class="card-icon ic-learn">L</div><div><div class="card-name">DeepLearning.AI</div><div class="card-sub">吴恩达 · 课程与专项</div></div></div></a>
+        <a class="card" href="https://www.youtube.com/@AndrejKarpathy" target="_blank"><div class="card-header"><div class="card-icon ic-learn">L</div><div><div class="card-name">Andrej Karpathy</div><div class="card-sub">大模型深度讲解</div></div></div></a>
+        <a class="card" href="https://www.youtube.com/@HungyiLeeNTU" target="_blank"><div class="card-header"><div class="card-icon ic-learn">L</div><div><div class="card-name">李宏毅</div><div class="card-sub">中文 · 深度学习</div></div></div></a>
+        <a class="card" href="https://www.youtube.com/@3blue1brown" target="_blank"><div class="card-header"><div class="card-icon ic-learn">L</div><div><div class="card-name">3Blue1Brown</div><div class="card-sub">数学可视化</div></div></div></a>
+        <a class="card" href="https://www.youtube.com/@googledeepmind" target="_blank"><div class="card-header"><div class="card-icon ic-learn">L</div><div><div class="card-name">Google DeepMind</div><div class="card-sub">AI 前沿研究</div></div></div></a>
+      </div>
+    </div>
+
+    <!-- 效率提升百宝箱 -->
+    <div class="section" id="section-tool">
+      <div class="section-title">
+        <div class="section-icon ic-tool">T</div>
+        <h2>效率提升百宝箱（电脑端）</h2>
+        <span class="count">5</span>
+      </div>
+      <div class="grid">
+        <a class="card" href="https://www.aigc.cn/" target="_blank"><div class="card-header"><div class="card-icon ic-tool">T</div><div><div class="card-name">AI GC 导航</div><div class="card-sub">AI 工具导航站</div></div></div></a>
+        <a class="card" href="https://ai-bot.cn/" target="_blank"><div class="card-header"><div class="card-icon ic-tool">T</div><div><div class="card-name">AI 工具集</div><div class="card-sub">AI 工具大全</div></div></div></a>
+        <a class="card" href="https://www.lingdongxieshou.com/" target="_blank"><div class="card-header"><div class="card-icon ic-tool">T</div><div><div class="card-name">灵动写手</div><div class="card-sub">AI 写作助手</div></div></div></a>
+        <a class="card" href="https://www.futurepedia.io/" target="_blank"><div class="card-header"><div class="card-icon ic-tool">T</div><div><div class="card-name">Futurepedia</div><div class="card-sub">AI 工具目录</div></div></div></a>
+        <a class="card" href="https://www.producthunt.com/" target="_blank"><div class="card-header"><div class="card-icon ic-tool">T</div><div><div class="card-name">Product Hunt</div><div class="card-sub">新产品发现</div></div></div></a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Made with ♥ for AI enthusiasts</p>
+    </div>
+  </div>
+</div>
+
+<!-- BRIEF: 公众号 -->
+<div id="view-brief-wx" class="view brief-wx">
+  <div class="brief-header">
+    <div class="brief-header-content">
+      <button class="btn-back-home" onclick="window.showView('main')">← 返回首页</button>
+      <div class="header-badge" style="background: rgba(90, 122, 138, 0.1); border-color: rgba(90, 122, 138, 0.3); color: #8ab0b8;">
+        微信公众号
+      </div>
+      <h1 style="background: linear-gradient(135deg, #fff 0%, #8ab0b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">当日公众号总结</h1>
+      <p>AI 资讯精选 · DeepSeek AI 自动生成</p>
+      <div class="date" id="date-wx"></div>
+      <div class="source-links">
+        <a href="https://www.jiqizhixin.com/" target="_blank" class="source-link">机器之心</a>
+        <a href="https://www.qbitai.com/" target="_blank" class="source-link">量子位</a>
+        <a href="https://weixin.sogou.com/weixin?type=1&query=新智元" target="_blank" class="source-link">新智元</a>
+        <a href="https://weixin.sogou.com/weixin?type=1&query=数字生命卡兹克" target="_blank" class="source-link">数字生命卡兹克</a>
+        <a href="https://hellogithub.com/" target="_blank" class="source-link">HelloGitHub</a>
+      </div>
+    </div>
+  </div>
+  <div class="brief-container">
+    <div class="generate-section">
+      <button class="btn-generate" onclick="window.generateBrief('wx')">
+        <span class="spinner"></span>
+        <span class="btn-text">🚀 一键生成今日总结（每日限1次）</span>
+      </button>
+      <div class="status-text" id="status-wx">点击按钮，AI 将自动生成今日公众号内容摘要</div>
+    </div>
+    <div class="content-display empty" id="display-wx">等待生成...</div>
+    <div class="brief-footer"><p>由 DeepSeek AI 自动生成 · 内容仅供参考</p></div>
+  </div>
+</div>
+
+<!-- BRIEF: Newsletter -->
+<div id="view-brief-nl" class="view brief-nl">
+  <div class="brief-header">
+    <div class="brief-header-content">
+      <button class="btn-back-home" onclick="window.showView('main')">← 返回首页</button>
+      <div class="header-badge" style="background: rgba(106, 122, 138, 0.1); border-color: rgba(106, 122, 138, 0.3); color: #9ab0c0;">
+        Newsletter
+      </div>
+      <h1 style="background: linear-gradient(135deg, #fff 0%, #9ab0c0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">当日 Newsletter 总结</h1>
+      <p>海外精选 · DeepSeek AI 自动生成</p>
+      <div class="date" id="date-nl"></div>
+      <div class="source-links">
+        <a href="https://www.therundown.ai/" target="_blank" class="source-link">The Rundown AI</a>
+        <a href="https://every.to/" target="_blank" class="source-link">Every</a>
+        <a href="https://www.lennysnewsletter.com/" target="_blank" class="source-link">Lenny's Newsletter</a>
+      </div>
+    </div>
+  </div>
+  <div class="brief-container">
+    <div class="generate-section">
+      <button class="btn-generate" onclick="window.generateBrief('nl')">
+        <span class="spinner"></span>
+        <span class="btn-text">🚀 一键生成今日总结（每日限1次）</span>
+      </button>
+      <div class="status-text" id="status-nl">点击按钮，AI 将自动生成今日 Newsletter 摘要</div>
+    </div>
+    <div class="content-display empty" id="display-nl">等待生成...</div>
+    <div class="brief-footer"><p>由 DeepSeek AI 自动生成 · 内容仅供参考</p></div>
+  </div>
+</div>
+
+<!-- BRIEF: 播客 -->
+<div id="view-brief-pod" class="view brief-pod">
+  <div class="brief-header">
+    <div class="brief-header-content">
+      <button class="btn-back-home" onclick="window.showView('main')">← 返回首页</button>
+      <div class="header-badge" style="background: rgba(122, 122, 154, 0.1); border-color: rgba(122, 122, 154, 0.3); color: #a0a0c0;">
+        播客
+      </div>
+      <h1 style="background: linear-gradient(135deg, #fff 0%, #a0a0c0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">当日播客总结</h1>
+      <p>中文精选 · DeepSeek AI 自动生成</p>
+      <div class="date" id="date-pod"></div>
+      <div class="source-links">
+        <a href="https://podcasts.apple.com/us/podcast/%E7%A1%85%E8%B0%B7101/id1498541229" target="_blank" class="source-link">硅谷101</a>
+        <a href="https://podcasts.apple.com/us/podcast/%E6%99%9A%E7%82%B9%E8%81%8A-latetalk/id1564877433" target="_blank" class="source-link">晚点聊</a>
+        <a href="https://podcasts.apple.com/us/podcast/ai%E7%82%BC%E9%87%91%E6%9C%AF/id1671502201" target="_blank" class="source-link">AI 炼金术</a>
+        <a href="https://podcasts.apple.com/us/podcast/%E5%8D%81%E5%AD%97%E8%B7%AF%E5%8F%A3crossing/id1729552193" target="_blank" class="source-link">十字路口</a>
+      </div>
+    </div>
+  </div>
+  <div class="brief-container">
+    <div class="generate-section">
+      <button class="btn-generate" onclick="window.generateBrief('pod')">
+        <span class="spinner"></span>
+        <span class="btn-text">🚀 一键生成今日总结（每日限1次）</span>
+      </button>
+      <div class="status-text" id="status-pod">点击按钮，AI 将自动生成今日播客摘要</div>
+    </div>
+    <div class="content-display empty" id="display-pod">等待生成...</div>
+    <div class="brief-footer"><p>由 DeepSeek AI 自动生成 · 内容仅供参考</p></div>
+  </div>
+</div>
+
+<!-- BRIEF: YouTube -->
+<div id="view-brief-yt" class="view brief-yt">
+  <div class="brief-header">
+    <div class="brief-header-content">
+      <button class="btn-back-home" onclick="window.showView('main')">← 返回首页</button>
+      <div class="header-badge" style="background: rgba(138, 122, 138, 0.1); border-color: rgba(138, 122, 138, 0.3); color: #b0a0b0;">
+        YouTube
+      </div>
+      <h1 style="background: linear-gradient(135deg, #fff 0%, #b0a0b0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">当日 YouTube 总结</h1>
+      <p>视频精选 · DeepSeek AI 自动生成</p>
+      <div class="date" id="date-yt"></div>
+      <div class="source-links">
+        <a href="https://www.youtube.com/@AndrejKarpathy" target="_blank" class="source-link">Andrej Karpathy</a>
+        <a href="https://www.youtube.com/@TwoMinutePapers" target="_blank" class="source-link">Two Minute Papers</a>
+        <a href="https://www.youtube.com/@lexfridman" target="_blank" class="source-link">Lex Fridman</a>
+        <a href="https://www.youtube.com/@LennysPodcast" target="_blank" class="source-link">Lenny's Podcast</a>
+      </div>
+    </div>
+  </div>
+  <div class="brief-container">
+    <div class="generate-section">
+      <button class="btn-generate" onclick="window.generateBrief('yt')">
+        <span class="spinner"></span>
+        <span class="btn-text">🚀 一键生成今日总结（每日限1次）</span>
+      </button>
+      <div class="status-text" id="status-yt">点击按钮，AI 将自动生成今日 YouTube 摘要</div>
+    </div>
+    <div class="content-display empty" id="display-yt">等待生成...</div>
+    <div class="brief-footer"><p>由 DeepSeek AI 自动生成 · 内容仅供参考</p></div>
+  </div>
+</div>
+
+<script>
+  // ══════════════════════════════════════════════════
+  // CONFIG
+  // ══════════════════════════════════════════════════
+  const API_KEY = 'sk-538a759a31a64c9990b3e4280a13d67b';
+  const API_URL = 'https://api.deepseek.com/chat/completions';
+
+  const prompts = {
+    wx: `你是一个专业的 AI 资讯编辑。今天是 {{date}}。
+
+请为以下中文 AI 公众号生成今日内容摘要：
+- 机器之心：专注 AI 技术和产业报道
+- 量子位：AI 前沿资讯和深度分析
+- 新智元：全球 AI 动态追踪
+- 数字生命卡兹克：AI 工具和实践分享
+- HelloGitHub：开源项目推荐
+
+请根据这些公众号的定位，模拟生成 5 条今日可能发布的 AI 相关热点内容摘要。每条包含：
+1. 来源公众号名称
+2. 文章标题
+3. 3 个核心要点（每点一句话）
+
+格式要求：用中文，简洁专业，突出重点。`,
+
+    nl: `你是一个专业的 AI 资讯编辑。今天是 {{date}}。
+
+请为以下英文 AI Newsletter 生成今日内容摘要：
+- The Rundown AI：每日 AI 新闻速递
+- Every：AI 与商业深度分析
+- Lenny's Newsletter：产品与增长策略
+
+请根据这些 Newsletter 的定位，模拟生成 3 条今日可能发布的内容摘要。每条包含：
+1. 来源名称
+2. 文章标题（英文）
+3. 3 个核心要点（中文翻译）
+
+格式要求：标题保留英文，要点用中文，简洁专业。`,
+
+    pod: `你是一个专业的播客内容编辑。今天是 {{date}}。
+
+请为以下中文科技播客生成最新一期节目摘要：
+- 硅谷101：硅谷科技深度访谈
+- 晚点聊 Late Talk：中国科技公司深度对话
+- AI 炼金术：AI 工具实践分享
+- 十字路口：科技人物访谈
+
+请根据这些播客的定位，模拟生成 4 条最新节目摘要。每条包含：
+1. 播客名称
+2. 节目标题
+3. 时长和嘉宾（如有）
+4. 3 个核心观点
+
+格式要求：中文，突出嘉宾观点和干货内容。`,
+
+    yt: `你是一个专业的 YouTube 内容编辑。今天是 {{date}}。
+
+请为以下 AI 相关 YouTube 频道生成最新视频摘要：
+- Andrej Karpathy：AI 技术深度讲解
+- Two Minute Papers：AI 论文速递
+- Lex Fridman：AI 领袖深度访谈
+- Lenny's Podcast：产品与增长
+
+请根据这些频道的定位，模拟生成 4 条最新视频摘要。每条包含：
+1. 频道名称
+2. 视频标题（英文）
+3. 时长
+4. 3 个核心内容点（中文）
+
+格式要求：标题保留英文，内容用中文，突出技术干货。`
+  };
+
+  // ══════════════════════════════════════════════════
+  // VIEW SWITCHING
+  // ══════════════════════════════════════════════════
+  window.showView = function(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    
+    const targetView = document.getElementById('view-' + viewId);
+    if (targetView) {
+      targetView.classList.add('active');
+    }
+    const tab = document.querySelector(`[data-view="${viewId}"]`);
+    if (tab) tab.classList.add('active');
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => showView(tab.dataset.view));
+  });
+
+  // ══════════════════════════════════════════════════
+  // AI GENERATION
+  // ══════════════════════════════════════════════════
+  // 检查是否在24小时内已调用过API
+  function canCallApi(type) {
+    const lastCallTime = localStorage.getItem(`brief-${type}-lastCall`);
+    if (!lastCallTime) return true;
+    
+    const hoursSinceLastCall = (Date.now() - parseInt(lastCallTime)) / (1000 * 60 * 60);
+    return hoursSinceLastCall >= 24;
+  }
+  
+  // 获取距离下次可用的剩余时间
+  function getTimeUntilNextCall(type) {
+    const lastCallTime = localStorage.getItem(`brief-${type}-lastCall`);
+    if (!lastCallTime) return null;
+    
+    const msUntilNext = parseInt(lastCallTime) + (24 * 60 * 60 * 1000) - Date.now();
+    if (msUntilNext <= 0) return null;
+    
+    const hours = Math.floor(msUntilNext / (1000 * 60 * 60));
+    const minutes = Math.floor((msUntilNext % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}小时${minutes}分钟`;
+  }
+
+  window.generateBrief = async function(type) {
+    const btn = document.querySelector(`#view-brief-${type} .btn-generate`);
+    const status = document.getElementById(`status-${type}`);
+    const display = document.getElementById(`display-${type}`);
+    
+    // 检查24小时限制
+    if (!canCallApi(type)) {
+      const timeLeft = getTimeUntilNextCall(type);
+      status.textContent = `⏳ 每日限用1次，距离下次可用还有 ${timeLeft}`;
+      return;
+    }
+    
+    // Start loading
+    btn.classList.add('loading');
+    btn.disabled = true;
+    status.textContent = '正在连接 DeepSeek AI...';
+    display.classList.remove('empty');
+    display.classList.add('streaming');
+    display.textContent = '';
+
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+    const prompt = prompts[type].replace('{{date}}', dateStr);
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: '你是一个专业的 AI 资讯编辑，擅长生成简洁、专业的内容摘要。' },
+            { role: 'user', content: prompt }
+          ],
+          stream: true
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API 错误: ${response.status}`);
+      }
+
+      status.textContent = '正在生成内容...';
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let content = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            
+            try {
+              const json = JSON.parse(data);
+              const delta = json.choices?.[0]?.delta?.content;
+              if (delta) {
+                content += delta;
+                display.textContent = content;
+              }
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
+        }
+      }
+
+      // Done
+      display.classList.remove('streaming');
+      status.textContent = '✅ 生成完成！内容已自动保存（24小时后可再次生成）';
+      
+      // Save to localStorage
+      const today2 = new Date().toISOString().split('T')[0];
+      localStorage.setItem(`brief-${type}-${today2}`, content);
+      
+      // 记录本次调用时间
+      localStorage.setItem(`brief-${type}-lastCall`, Date.now().toString());
+
+    } catch (error) {
+      display.classList.remove('streaming');
+      display.textContent = `❌ 生成失败: ${error.message}\n\n请检查网络连接后重试。`;
+      status.textContent = '生成失败，请重试';
+    }
+
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+
+  // ══════════════════════════════════════════════════
+  // INIT
+  // ══════════════════════════════════════════════════
+  const today = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+  const dateStr = today.toLocaleDateString('zh-CN', options);
+  
+  ['date-wx', 'date-nl', 'date-pod', 'date-yt'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = dateStr;
+  });
+
+  // Load cached content and check rate limit status
+  const today2 = new Date().toISOString().split('T')[0];
+  ['wx', 'nl', 'pod', 'yt'].forEach(type => {
+    const cached = localStorage.getItem(`brief-${type}-${today2}`);
+    const status = document.getElementById(`status-${type}`);
+    
+    if (cached) {
+      const display = document.getElementById(`display-${type}`);
+      display.classList.remove('empty');
+      display.textContent = cached;
+      
+      // 检查是否仍在限制期内
+      if (!canCallApi(type)) {
+        const timeLeft = getTimeUntilNextCall(type);
+        status.textContent = `✅ 已加载今日缓存（${timeLeft}后可再次生成）`;
+      } else {
+        status.textContent = '✅ 已加载今日缓存';
+      }
+    } else if (!canCallApi(type)) {
+      // 无缓存但在限制期内（可能是手动清除了缓存）
+      const timeLeft = getTimeUntilNextCall(type);
+      status.textContent = `⏳ 每日限用1次，距离下次可用还有 ${timeLeft}`;
+    }
+  });
+</script>
+
+</body>
+</html>
