@@ -371,6 +371,93 @@
       font-size: 12px;
     }
 
+    /* 登录 & 付费弹窗 */
+    .paywall-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .paywall-overlay.active {
+      display: flex;
+    }
+    .paywall-modal {
+      width: 320px;
+      max-width: 90vw;
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      padding: 20px 20px 18px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .paywall-modal h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    .paywall-modal p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .paywall-badges {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .paywall-badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-tertiary);
+    }
+    .paywall-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .btn-paywall {
+      flex: 1;
+      padding: 9px 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .btn-paywall-primary {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      color: #fff;
+    }
+    .btn-paywall-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    .btn-paywall-secondary {
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+    .btn-paywall-secondary:hover {
+      background: var(--bg-card-hover);
+    }
+    .paywall-note {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      text-align: right;
+      margin-top: 4px;
+    }
     /* Brief View */
     .brief-header {
       position: relative;
@@ -592,6 +679,24 @@
   </style>
 </head>
 <body>
+
+<div id="paywall-overlay" class="paywall-overlay">
+  <div class="paywall-modal">
+    <h3 id="paywall-title">登录后使用总结功能</h3>
+    <p id="paywall-desc">总结页面仅对登录且已付费的用户开放。请先完成登录和付费开通。</p>
+    <div class="paywall-badges">
+      <span class="paywall-badge">🔒 总结功能 Pro</span>
+      <span class="paywall-badge">✨ 每日高质量 AI 总结</span>
+    </div>
+    <div class="paywall-actions">
+      <button id="btn-login" class="btn-paywall btn-paywall-secondary">先登录</button>
+      <button id="btn-upgrade" class="btn-paywall btn-paywall-primary">已付费，开通权限</button>
+    </div>
+    <div class="paywall-note">
+      <button id="btn-paywall-close" class="btn-paywall btn-paywall-secondary" style="width: auto; padding-inline: 10px; font-size: 11px;">稍后再说</button>
+    </div>
+  </div>
+</div>
 
 <div class="bg-gradient"></div>
 <div class="grid-pattern"></div>
@@ -968,7 +1073,42 @@
   // ══════════════════════════════════════════════════
   // VIEW SWITCHING
   // ══════════════════════════════════════════════════
+  function isLoggedIn() {
+    return localStorage.getItem('user-logged-in') === 'true';
+  }
+
+  function isProUser() {
+    return localStorage.getItem('user-pro') === 'true';
+  }
+
+  function ensureBriefAccess() {
+    const overlay = document.getElementById('paywall-overlay');
+    const titleEl = document.getElementById('paywall-title');
+    const descEl = document.getElementById('paywall-desc');
+
+    if (!isLoggedIn()) {
+      if (titleEl) titleEl.textContent = '登录后使用总结功能';
+      if (descEl) descEl.textContent = '总结页面仅对登录用户开放，请先完成登录。';
+      if (overlay) overlay.classList.add('active');
+      return false;
+    }
+
+    if (!isProUser()) {
+      if (titleEl) titleEl.textContent = '升级为付费用户解锁总结功能';
+      if (descEl) descEl.textContent = '总结页面仅对已付费用户开放，请先完成付费开通。';
+      if (overlay) overlay.classList.add('active');
+      return false;
+    }
+
+    return true;
+  }
+
   window.showView = function(viewId) {
+    if (viewId && viewId.indexOf('brief-') === 0) {
+      if (!ensureBriefAccess()) {
+        return;
+      }
+    }
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     
@@ -985,6 +1125,48 @@
   document.querySelectorAll('.nav-tab').forEach(tab => {
     tab.addEventListener('click', () => showView(tab.dataset.view));
   });
+
+  // 登录 & 付费弹窗逻辑
+  (function setupPaywall() {
+    const overlay = document.getElementById('paywall-overlay');
+    const btnLogin = document.getElementById('btn-login');
+    const btnUpgrade = document.getElementById('btn-upgrade');
+    const btnClose = document.getElementById('btn-paywall-close');
+    const descEl = document.getElementById('paywall-desc');
+
+    if (!overlay) return;
+
+    function hideOverlay() {
+      overlay.classList.remove('active');
+    }
+
+    if (btnLogin) {
+      btnLogin.addEventListener('click', () => {
+        localStorage.setItem('user-logged-in', 'true');
+        if (descEl) {
+          descEl.textContent = '已登录，请继续完成付费开通以解锁总结功能。';
+        }
+      });
+    }
+
+    if (btnUpgrade) {
+      btnUpgrade.addEventListener('click', () => {
+        if (!isLoggedIn()) {
+          if (descEl) {
+            descEl.textContent = '请先登录账号，再完成付费开通。';
+          }
+          return;
+        }
+        localStorage.setItem('user-pro', 'true');
+        hideOverlay();
+        alert('已开通总结功能权限，重新点击导航中的总结页面即可使用。');
+      });
+    }
+
+    if (btnClose) {
+      btnClose.addEventListener('click', hideOverlay);
+    }
+  })();
 
   // ══════════════════════════════════════════════════
   // AI GENERATION
