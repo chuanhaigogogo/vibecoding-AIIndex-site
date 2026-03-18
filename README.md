@@ -1,5 +1,7 @@
 # 🚀 AI Index 
 
+网址：https://chuanhaigogogo.github.io/vibecoding-AIIndex-site/
+
 > 一个精选的 AI 核心资源信息索引，拒绝废话，直达干货。
 
 > 制作初衷：每天打开各种app追ai消息，有点手忙脚乱。有时会忘看某部分，有时觉得退出进入不同app很烦。所以罗列了日常主要看的消息源头，自动跳转，当check list一个个看完。
