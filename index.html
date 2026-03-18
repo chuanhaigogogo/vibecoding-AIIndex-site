@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Source Navigator</title>
+  <title>AI Index</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
     
@@ -94,6 +94,19 @@
       transition: all 0.2s;
       white-space: nowrap;
     }
+    .nav-tab.has-sub {
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      line-height: 1.1;
+      text-align: center;
+    }
+    .nav-tab .nav-sub {
+      font-size: 0.7em;
+      color: var(--text-tertiary);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
     .nav-tab:hover {
       background: var(--bg-card);
       color: var(--text-primary);
@@ -114,6 +127,52 @@
       color: var(--text-primary);
       margin-right: 12px;
       white-space: nowrap;
+    }
+
+    .nav-spacer { flex: 1; }
+    .nav-settings-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .nav-settings-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .nav-spacer { flex: 1; }
+    .nav-settings-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .nav-settings-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+      transform: translateY(-1px);
     }
 
     .view { display: none; }
@@ -371,92 +430,274 @@
       font-size: 12px;
     }
 
-    /* 登录 & 付费弹窗 */
-    .paywall-overlay {
+    /* AI 设置弹窗（用户自带 Key） */
+    .ai-settings-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.65);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 999;
+      z-index: 1000;
     }
-    .paywall-overlay.active {
-      display: flex;
-    }
-    .paywall-modal {
-      width: 320px;
-      max-width: 90vw;
+    .ai-settings-overlay.active { display: flex; }
+    .ai-settings-modal {
+      width: 520px;
+      max-width: 92vw;
       background: var(--bg-secondary);
       border-radius: 16px;
       border: 1px solid var(--border-color);
-      padding: 20px 20px 18px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      padding: 18px 18px 14px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.55);
     }
-    .paywall-modal h3 {
-      font-size: 16px;
-      margin-bottom: 8px;
-    }
-    .paywall-modal p {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 14px;
-      line-height: 1.5;
-    }
-    .paywall-badges {
+    .ai-settings-head {
       display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
     }
-    .paywall-badge {
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 999px;
+    .ai-settings-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+    .ai-settings-close {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      color: var(--text-tertiary);
-    }
-    .paywall-actions {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .btn-paywall {
-      flex: 1;
-      padding: 9px 10px;
-      border-radius: 999px;
-      border: none;
-      font-size: 13px;
-      font-weight: 600;
+      color: var(--text-secondary);
+      border-radius: 10px;
+      padding: 6px 10px;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
+      transition: all 0.2s ease;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .ai-settings-close:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+    .ai-privacy {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .ai-privacy strong { color: var(--text-primary); }
+    .ai-settings-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .ai-field label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .ai-field input {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
       transition: all 0.2s ease;
     }
-    .btn-paywall-primary {
+    .ai-field input:focus {
+      border-color: rgba(120, 140, 170, 0.7);
+      box-shadow: 0 0 0 3px rgba(120, 140, 170, 0.18);
+    }
+    .ai-field .ai-hint {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.4;
+    }
+    .ai-settings-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .ai-actions-left, .ai-actions-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn-ai {
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-ai:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+    .btn-ai-primary {
+      border: none;
       background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
       color: #fff;
     }
-    .btn-paywall-primary:hover {
-      transform: translateY(-1px);
+    .btn-ai-primary:hover {
       box-shadow: 0 8px 24px rgba(0,0,0,0.35);
     }
-    .btn-paywall-secondary {
-      background: var(--bg-card);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
-    }
-    .btn-paywall-secondary:hover {
-      background: var(--bg-card-hover);
-    }
-    .paywall-note {
+    .ai-status {
       font-size: 11px;
       color: var(--text-tertiary);
-      text-align: right;
-      margin-top: 4px;
+    }
+
+    /* AI 设置弹窗（用户自带 Key） */
+    .ai-settings-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .ai-settings-overlay.active { display: flex; }
+    .ai-settings-modal {
+      width: 520px;
+      max-width: 92vw;
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      padding: 18px 18px 14px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.55);
+    }
+    .ai-settings-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .ai-settings-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+    .ai-settings-close {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      border-radius: 10px;
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .ai-settings-close:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+    .ai-privacy {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .ai-privacy strong { color: var(--text-primary); }
+    .ai-settings-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .ai-field label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .ai-field input {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .ai-field input:focus {
+      border-color: rgba(120, 140, 170, 0.7);
+      box-shadow: 0 0 0 3px rgba(120, 140, 170, 0.18);
+    }
+    .ai-field .ai-hint {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.4;
+    }
+    .ai-settings-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .ai-actions-left, .ai-actions-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn-ai {
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-ai:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+    .btn-ai-primary {
+      border: none;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      color: #fff;
+    }
+    .btn-ai-primary:hover {
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    .ai-status {
+      font-size: 11px;
+      color: var(--text-tertiary);
     }
     /* Brief View */
     .brief-header {
@@ -680,20 +921,42 @@
 </head>
 <body>
 
-<div id="paywall-overlay" class="paywall-overlay">
-  <div class="paywall-modal">
-    <h3 id="paywall-title">登录后使用总结功能</h3>
-    <p id="paywall-desc">总结页面仅对登录且已付费的用户开放。请先完成登录和付费开通。</p>
-    <div class="paywall-badges">
-      <span class="paywall-badge">🔒 总结功能 Pro</span>
-      <span class="paywall-badge">✨ 每日高质量 AI 总结</span>
+<div id="ai-settings-overlay" class="ai-settings-overlay" aria-hidden="true">
+  <div class="ai-settings-modal" role="dialog" aria-modal="true" aria-labelledby="ai-settings-title">
+    <div class="ai-settings-head">
+      <div class="ai-settings-title" id="ai-settings-title">AI 设置（用户自带 Key）</div>
+      <button type="button" class="ai-settings-close" onclick="window.closeAiSettings()">关闭</button>
     </div>
-    <div class="paywall-actions">
-      <button id="btn-login" class="btn-paywall btn-paywall-secondary">先登录</button>
-      <button id="btn-upgrade" class="btn-paywall btn-paywall-primary">已付费，开通权限</button>
+
+    <div class="ai-privacy">
+      <strong>隐私承诺：</strong>所有配置仅保存在您的浏览器本地，本站不设后台，绝不记录您的隐私信息。
     </div>
-    <div class="paywall-note">
-      <button id="btn-paywall-close" class="btn-paywall btn-paywall-secondary" style="width: auto; padding-inline: 10px; font-size: 11px;">稍后再说</button>
+
+    <div class="ai-settings-grid">
+      <div class="ai-field">
+        <label for="ai-api-key">API Key（必填）</label>
+        <input id="ai-api-key" type="password" autocomplete="off" placeholder="sk-..." />
+        <div class="ai-hint">提示：Key 只会保存到本机 localStorage，可随时清除。</div>
+      </div>
+      <div class="ai-field">
+        <label for="ai-base-url">接口地址（Base URL）</label>
+        <input id="ai-base-url" type="text" placeholder="https://api.deepseek.com" />
+        <div class="ai-hint">会自动拼接为 Chat Completions：Base URL + <code>/chat/completions</code>（若 Base URL 已含 <code>/v1</code> 也兼容）。</div>
+      </div>
+      <div class="ai-field">
+        <label for="ai-model">模型名称</label>
+        <input id="ai-model" type="text" placeholder="deepseek-chat / gpt-4o" />
+      </div>
+    </div>
+
+    <div class="ai-settings-actions">
+      <div class="ai-actions-left">
+        <button type="button" class="btn-ai" onclick="window.clearAiSettings()">清除配置</button>
+        <span class="ai-status" id="ai-settings-status"></span>
+      </div>
+      <div class="ai-actions-right">
+        <button type="button" class="btn-ai btn-ai-primary" onclick="window.saveAiSettings()">保存</button>
+      </div>
     </div>
   </div>
 </div>
@@ -703,12 +966,32 @@
 
 <nav class="top-nav">
   <div class="top-nav-inner">
-    <span class="nav-logo">AI导航</span>
-    <button class="nav-tab active" data-view="main">首页</button>
-    <button class="nav-tab" data-view="brief-wx">公众号总结</button>
-    <button class="nav-tab" data-view="brief-nl">Newsletter总结</button>
-    <button class="nav-tab" data-view="brief-pod">播客总结</button>
-    <button class="nav-tab" data-view="brief-yt">YouTube总结</button>
+    <span class="nav-logo"></span>
+    <button class="nav-tab has-sub active" data-view="main">
+      <span>首页</span>
+      <span class="nav-sub">Homepage</span>
+    </button>
+    <button class="nav-tab has-sub" data-view="brief-wx">
+      <span>公众号总结</span>
+      <span class="nav-sub">Wechat Brief</span>
+    </button>
+    <button class="nav-tab has-sub" data-view="brief-nl">
+      <span>Newsletter总结</span>
+      <span class="nav-sub">Newsletter Brief</span>
+    </button>
+    <button class="nav-tab has-sub" data-view="brief-pod">
+      <span>播客总结</span>
+      <span class="nav-sub">Podcast Brief</span>
+    </button>
+    <button class="nav-tab has-sub" data-view="brief-yt">
+      <span>YouTube总结</span>
+      <span class="nav-sub">Youtube Brief</span>
+    </button>
+    <span class="nav-spacer"></span>
+    <button class="nav-settings-btn" type="button" onclick="window.openAiSettings()">
+      <span aria-hidden="true">⚙️</span>
+      设置
+    </button>
   </div>
 </nav>
 
@@ -719,10 +1002,10 @@
       <span class="dot"></span>
       实时更新
     </div>
-    <h1>AI Source Navigator</h1>
+    <h1>AI Index</h1>
     <div class="stats">
       <div class="stat-item" style="flex: 1; max-width: 100%;">
-        <div class="stat-label" style="font-size: 16px; font-weight: 700; letter-spacing: 1px; text-transform: none;">Follow the builders, become the influencers.</div>
+        <div class="stat-label" style="font-size: 16px; font-weight: 700; letter-spacing: 1px; text-transform: none;">Follow the builders here.</div>
       </div>
       <div class="stat-item" style="display: none;">
         <div class="stat-number">7</div>
@@ -737,10 +1020,10 @@
       <a href="#section-x">Twitter</a>
       <a href="#section-wx">公众号</a>
       <a href="#section-nl">Newsletter</a>
-      <a href="#section-pod">播客</a>
+      <a href="#section-pod">Podcast</a>
       <a href="#section-yt">YouTube</a>
-      <a href="#section-learn">深度学习</a>
-      <a href="#section-tool">工具箱</a>
+      <a href="#section-learn">Self-learning</a>
+      <a href="#section-tool">Toolkit</a>
     </div>
   </div>
 
@@ -757,13 +1040,13 @@
         <a class="card" href="https://x.com/sama" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Sam Altman</div><div class="card-sub">OpenAI CEO·ChatGPT缔造者</div></div></div></a>
         <a class="card" href="https://x.com/gdb" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Greg Brockman</div><div class="card-sub">OpenAI联创兼总裁</div></div></div></a>
         <a class="card" href="https://x.com/geoffreyhinton" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Geoffrey Hinton</div><div class="card-sub">深度学习之父·图灵奖得主</div></div></div></a>
-        <a class="card" href="https://x.com/zarazhangrui" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Zara Zhang</div><div class="card-sub">硅谷从业者·风向敏锐者</div></div></div></a>
         <a class="card" href="https://x.com/andrewyng" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Andrew Ng 吴恩达</div><div class="card-sub">机器学习教父</div></div></div></a>
         <a class="card" href="https://x.com/DarioAmodei" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Dario Amodei</div><div class="card-sub">Anthropic CEO</div></div></div></a>
         <a class="card" href="https://x.com/ch402" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Chris Olah</div><div class="card-sub">Anthropic联创</div></div></div></a>
         <a class="card" href="https://x.com/AnthropicAI" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Anthropic</div><div class="card-sub">Claude创造者</div></div></div></a>
         <a class="card" href="https://x.com/OpenAI" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">OpenAI</div><div class="card-sub">ChatGPT缔造者</div></div></div></a>
         <a class="card" href="https://x.com/midjourney" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Midjourney</div><div class="card-sub">AI绘画王者</div></div></div></a>
+        <a class="card" href="https://x.com/zarazhangrui" target="_blank"><div class="card-header"><div class="card-icon ic-x">𝕏</div><div><div class="card-name">Zara Zhang</div><div class="card-sub">硅谷从业者·风向敏锐者</div></div></div></a>
       </div>
     </div>
 
@@ -781,7 +1064,7 @@
         <a class="card" href="https://weixin.sogou.com/weixin?type=1&query=数字生命卡兹克" target="_blank"><div class="card-header"><div class="card-icon ic-wx">W</div><div><div class="card-name">数字生命卡兹克</div><div class="card-sub">AI 资讯</div></div></div></a>
         <a class="card" href="https://hellogithub.com/" target="_blank"><div class="card-header"><div class="card-icon ic-wx">W</div><div><div class="card-name">HelloGitHub</div><div class="card-sub">开源项目</div></div></div></a>
         <a class="card" href="weixin://subscriptionPage" target="_blank"><div class="card-header"><div class="card-icon ic-wx">W</div><div><div class="card-name">微信订阅号</div><div class="card-sub">公众号订阅</div></div></div></a>
-        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-wx');return false;"><span class="brief-badge">每日限1次</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">当日总结</div><div class="card-sub">AI 自动生成 · 每日限1次</div></div></div></a>
+        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-wx');return false;"><span class="brief-badge">AI 总结</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">Daily Brief</div><div class="card-sub">AI 自动生成</div></div></div></a>
       </div>
     </div>
 
@@ -796,8 +1079,8 @@
         <a class="card" href="https://www.therundown.ai/" target="_blank"><div class="card-header"><div class="card-icon ic-nl">N</div><div><div class="card-name">The Rundown AI</div><div class="card-sub">每日 AI 简报</div></div></div></a>
         <a class="card" href="https://every.to/" target="_blank"><div class="card-header"><div class="card-icon ic-nl">N</div><div><div class="card-name">Every</div><div class="card-sub">AI & 商业</div></div></div></a>
         <a class="card" href="https://www.lennysnewsletter.com/" target="_blank"><div class="card-header"><div class="card-icon ic-nl">N</div><div><div class="card-name">Lenny's Newsletter</div><div class="card-sub">产品 & 增长</div></div></div></a>
-        <a class="card" href="feedly://" target="_blank"><div class="card-header"><div class="card-icon ic-nl">N</div><div><div class="card-name">Feedly</div><div class="card-sub">打开 App</div></div></div></a>
-        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-nl');return false;"><span class="brief-badge">每日限1次</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">当日总结</div><div class="card-sub">AI 自动生成 · 每日限1次</div></div></div></a>
+        <a class="card" href="https://feedly.com/i/collection/content/user/03416181-9cac-46bf-8691-5fda78370c35/category/global.all" target="_blank"><div class="card-header"><div class="card-icon ic-nl">N</div><div><div class="card-name">Feedly</div><div class="card-sub">打开 App</div></div></div></a>
+        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-nl');return false;"><span class="brief-badge">AI 总结</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">Daily Brief</div><div class="card-sub">AI 自动生成</div></div></div></a>
       </div>
     </div>
 
@@ -805,15 +1088,16 @@
     <div class="section" id="section-pod">
       <div class="section-title">
         <div class="section-icon ic-pod">P</div>
-        <h2>播客</h2>
-        <span class="count">5</span>
+        <h2>Podcast</h2>
+        <span class="count">6</span>
       </div>
       <div class="grid">
-        <a class="card" href="https://podcasts.apple.com/us/podcast/%E7%A1%85%E8%B0%B7101/id1498541229" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">硅谷101</div><div class="card-sub">中文 · 硅谷科技</div></div></div></a>
-        <a class="card" href="https://podcasts.apple.com/us/podcast/%E6%99%9A%E7%82%B9%E8%81%8A-latetalk/id1564877433" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">晚点聊 Late Talk</div><div class="card-sub">中文 · 科技深度</div></div></div></a>
-        <a class="card" href="https://podcasts.apple.com/us/podcast/ai%E7%82%BC%E9%87%91%E6%9C%AF/id1671502201" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">AI 炼金术</div><div class="card-sub">中文 · AI 实践</div></div></div></a>
-        <a class="card" href="https://podcasts.apple.com/us/podcast/%E5%8D%81%E5%AD%97%E8%B7%AF%E5%8F%A3crossing/id1729552193" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">十字路口</div><div class="card-sub">中文 · 科技访谈</div></div></div></a>
-        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-pod');return false;"><span class="brief-badge">每日限1次</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">当日总结</div><div class="card-sub">AI 自动生成 · 每日限1次</div></div></div></a>
+        <a class="card" href="https://podcasts.apple.com/us/podcast/ai%E7%82%BC%E9%87%91%E6%9C%AF/id1671502201" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">AI炼金术（可周一听）</div><div class="card-sub">中文 · AI 实践</div></div></div></a>
+        <a class="card" href="https://podcasts.apple.com/us/podcast/%E7%A1%85%E8%B0%B7101/id1498541229" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">硅谷101（可周四听）</div><div class="card-sub">中文 · 硅谷科技</div></div></div></a>
+        <a class="card" href="https://podcasts.apple.com/us/podcast/%E6%99%9A%E7%82%B9%E8%81%8A-latetalk/id1564877433" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">晚点聊talk（可周五听）</div><div class="card-sub">中文 · 科技深度</div></div></div></a>
+        <a class="card" href="https://podcasts.apple.com/us/podcast/42%E7%AB%A0%E7%BB%8F/id1700299886" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">42章经（可周六听）</div><div class="card-sub">中文 · 科技访谈</div></div></div></a>
+        <a class="card" href="https://podcasts.apple.com/us/podcast/%E5%8D%81%E5%AD%97%E8%B7%AF%E5%8F%A3crossing/id1729552193" target="_blank"><div class="card-header"><div class="card-icon ic-pod">P</div><div><div class="card-name">十字路口（可周日听）</div><div class="card-sub">中文 · 科技访谈</div></div></div></a>
+        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-pod');return false;"><span class="brief-badge">AI 总结</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">Daily Brief</div><div class="card-sub">AI 自动生成</div></div></div></a>
       </div>
     </div>
 
@@ -825,11 +1109,11 @@
         <span class="count">5</span>
       </div>
       <div class="grid">
+        <a class="card" href="https://www.youtube.com/@LennysPodcast" target="_blank"><div class="card-header"><div class="card-icon ic-yt">Y</div><div><div class="card-name">Lenny's Podcast（可周二看，半月更）</div><div class="card-sub">产品 & 增长</div></div></div></a>
+        <a class="card" href="https://www.youtube.com/@lexfridman" target="_blank"><div class="card-header"><div class="card-icon ic-yt">Y</div><div><div class="card-name">Lex Fridman（可周二看，半月更）</div><div class="card-sub">AI 访谈</div></div></div></a>
         <a class="card" href="https://www.youtube.com/@AndrejKarpathy" target="_blank"><div class="card-header"><div class="card-icon ic-yt">Y</div><div><div class="card-name">Andrej Karpathy</div><div class="card-sub">AI 研究员</div></div></div></a>
         <a class="card" href="https://www.youtube.com/@TwoMinutePapers" target="_blank"><div class="card-header"><div class="card-icon ic-yt">Y</div><div><div class="card-name">Two Minute Papers</div><div class="card-sub">论文速递</div></div></div></a>
-        <a class="card" href="https://www.youtube.com/@lexfridman" target="_blank"><div class="card-header"><div class="card-icon ic-yt">Y</div><div><div class="card-name">Lex Fridman</div><div class="card-sub">AI 访谈</div></div></div></a>
-        <a class="card" href="https://www.youtube.com/@LennysPodcast" target="_blank"><div class="card-header"><div class="card-icon ic-yt">Y</div><div><div class="card-name">Lenny's Podcast</div><div class="card-sub">产品 & 增长</div></div></div></a>
-        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-yt');return false;"><span class="brief-badge">每日限1次</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">当日总结</div><div class="card-sub">AI 自动生成 · 每日限1次</div></div></div></a>
+        <a class="card brief-card" href="javascript:void(0)" onclick="window.showView('brief-yt');return false;"><span class="brief-badge">AI 总结</span><div class="card-header"><div class="card-icon ic-brief">B</div><div><div class="card-name">Daily Brief</div><div class="card-sub">AI 自动生成</div></div></div></a>
       </div>
     </div>
 
@@ -837,7 +1121,7 @@
     <div class="section" id="section-learn">
       <div class="section-title">
         <div class="section-icon ic-learn">L</div>
-        <h2>AI 深度学习</h2>
+        <h2>AI Self-learning</h2>
         <span class="count">5</span>
       </div>
       <div class="grid">
@@ -853,7 +1137,7 @@
     <div class="section" id="section-tool">
       <div class="section-title">
         <div class="section-icon ic-tool">T</div>
-        <h2>效率提升百宝箱（电脑端）</h2>
+        <h2>Toolkit</h2>
         <span class="count">5</span>
       </div>
       <div class="grid">
@@ -866,7 +1150,7 @@
     </div>
 
     <div class="footer">
-      <p>Made with ♥ for AI enthusiasts by chuanhaigogogo</p>
+      <p>Made with ♥ for AI enthusiasts by amygogogo（川海向前走）</p>
     </div>
   </div>
 </div>
@@ -895,7 +1179,7 @@
     <div class="generate-section">
       <button class="btn-generate" onclick="window.generateBrief('wx')">
         <span class="spinner"></span>
-        <span class="btn-text">🚀 一键生成今日总结（每日限1次）</span>
+        <span class="btn-text">🚀 一键生成今日总结</span>
       </button>
       <div class="status-text" id="status-wx">点击按钮，AI 将自动生成今日公众号内容摘要</div>
     </div>
@@ -926,7 +1210,7 @@
     <div class="generate-section">
       <button class="btn-generate" onclick="window.generateBrief('nl')">
         <span class="spinner"></span>
-        <span class="btn-text">🚀 一键生成今日总结（每日限1次）</span>
+        <span class="btn-text">🚀 一键生成今日总结</span>
       </button>
       <div class="status-text" id="status-nl">点击按钮，AI 将自动生成今日 Newsletter 摘要</div>
     </div>
@@ -958,7 +1242,7 @@
     <div class="generate-section">
       <button class="btn-generate" onclick="window.generateBrief('pod')">
         <span class="spinner"></span>
-        <span class="btn-text">🚀 一键生成今日总结（每日限1次）</span>
+        <span class="btn-text">🚀 一键生成今日总结</span>
       </button>
       <div class="status-text" id="status-pod">点击按钮，AI 将自动生成今日播客摘要</div>
     </div>
@@ -990,7 +1274,7 @@
     <div class="generate-section">
       <button class="btn-generate" onclick="window.generateBrief('yt')">
         <span class="spinner"></span>
-        <span class="btn-text">🚀 一键生成今日总结（每日限1次）</span>
+        <span class="btn-text">🚀 一键生成今日总结</span>
       </button>
       <div class="status-text" id="status-yt">点击按钮，AI 将自动生成今日 YouTube 摘要</div>
     </div>
@@ -1003,8 +1287,125 @@
   // ══════════════════════════════════════════════════
   // CONFIG
   // ══════════════════════════════════════════════════
-  const API_KEY = 'sk-538a759a31a64c9990b3e4280a13d67b';
-  const API_URL = 'https://api.deepseek.com/chat/completions';
+  const AI_SETTINGS_STORAGE_KEYS = {
+    apiKey: 'ai-api-key',
+    baseUrl: 'ai-base-url',
+    model: 'ai-model'
+  };
+
+  function normalizeBaseUrl(url) {
+    return (url || '').trim().replace(/\/+$/, '');
+  }
+
+  function getAiSettings() {
+    const apiKey = (localStorage.getItem(AI_SETTINGS_STORAGE_KEYS.apiKey) || '').trim();
+    const baseUrl = normalizeBaseUrl(localStorage.getItem(AI_SETTINGS_STORAGE_KEYS.baseUrl) || 'https://api.deepseek.com');
+    const model = (localStorage.getItem(AI_SETTINGS_STORAGE_KEYS.model) || 'deepseek-chat').trim();
+    return { apiKey, baseUrl, model };
+  }
+
+  function buildChatCompletionsUrl(baseUrl) {
+    const b = normalizeBaseUrl(baseUrl || 'https://api.deepseek.com');
+    // 兼容：
+    // - DeepSeek: https://api.deepseek.com + /chat/completions
+    // - OpenAI:  https://api.openai.com/v1 + /chat/completions
+    // - 其他兼容：只要提供到 /v1 或根域名即可
+    if (b.endsWith('/chat/completions')) return b;
+    return `${b}/chat/completions`;
+  }
+
+  function setAiSettings(next) {
+    localStorage.setItem(AI_SETTINGS_STORAGE_KEYS.apiKey, (next.apiKey || '').trim());
+    localStorage.setItem(AI_SETTINGS_STORAGE_KEYS.baseUrl, normalizeBaseUrl(next.baseUrl || 'https://api.deepseek.com'));
+    localStorage.setItem(AI_SETTINGS_STORAGE_KEYS.model, (next.model || '').trim());
+  }
+
+  function updateAiSettingsStatus(msg) {
+    const el = document.getElementById('ai-settings-status');
+    if (el) el.textContent = msg || '';
+  }
+
+  window.openAiSettings = function() {
+    const overlay = document.getElementById('ai-settings-overlay');
+    const { apiKey, baseUrl, model } = getAiSettings();
+    const keyInput = document.getElementById('ai-api-key');
+    const baseInput = document.getElementById('ai-base-url');
+    const modelInput = document.getElementById('ai-model');
+
+    if (keyInput) keyInput.value = apiKey;
+    if (baseInput) baseInput.value = baseUrl || 'https://api.deepseek.com';
+    if (modelInput) modelInput.value = model || 'deepseek-chat';
+
+    updateAiSettingsStatus('');
+    if (overlay) {
+      overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden', 'false');
+    }
+    setTimeout(() => {
+      if (keyInput) keyInput.focus();
+    }, 0);
+  };
+
+  window.closeAiSettings = function() {
+    const overlay = document.getElementById('ai-settings-overlay');
+    if (overlay) {
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+  };
+
+  window.saveAiSettings = function() {
+    const keyInput = document.getElementById('ai-api-key');
+    const baseInput = document.getElementById('ai-base-url');
+    const modelInput = document.getElementById('ai-model');
+
+    const apiKey = (keyInput ? keyInput.value : '').trim();
+    const baseUrl = normalizeBaseUrl(baseInput ? baseInput.value : 'https://api.deepseek.com');
+    const model = (modelInput ? modelInput.value : 'deepseek-chat').trim();
+
+    if (!apiKey) {
+      updateAiSettingsStatus('请填写 API Key');
+      if (keyInput) keyInput.focus();
+      return;
+    }
+    if (!baseUrl) {
+      updateAiSettingsStatus('请填写 Base URL');
+      if (baseInput) baseInput.focus();
+      return;
+    }
+    if (!model) {
+      updateAiSettingsStatus('请填写模型名称');
+      if (modelInput) modelInput.focus();
+      return;
+    }
+
+    setAiSettings({ apiKey, baseUrl, model });
+    updateAiSettingsStatus('已保存');
+    window.closeAiSettings();
+  };
+
+  window.clearAiSettings = function() {
+    localStorage.removeItem(AI_SETTINGS_STORAGE_KEYS.apiKey);
+    localStorage.removeItem(AI_SETTINGS_STORAGE_KEYS.baseUrl);
+    localStorage.removeItem(AI_SETTINGS_STORAGE_KEYS.model);
+    updateAiSettingsStatus('已清除');
+
+    const keyInput = document.getElementById('ai-api-key');
+    const baseInput = document.getElementById('ai-base-url');
+    const modelInput = document.getElementById('ai-model');
+    if (keyInput) keyInput.value = '';
+    if (baseInput) baseInput.value = 'https://api.deepseek.com';
+    if (modelInput) modelInput.value = 'deepseek-chat';
+  };
+
+  function ensureAiSettings() {
+    const { apiKey, baseUrl, model } = getAiSettings();
+    if (!apiKey || !baseUrl || !model) {
+      window.openAiSettings();
+      return null;
+    }
+    return { apiKey, baseUrl, model };
+  }
 
   const prompts = {
     wx: `你是一个专业的 AI 资讯编辑。今天是 {{date}}。
@@ -1073,42 +1474,7 @@
   // ══════════════════════════════════════════════════
   // VIEW SWITCHING
   // ══════════════════════════════════════════════════
-  function isLoggedIn() {
-    return localStorage.getItem('user-logged-in') === 'true';
-  }
-
-  function isProUser() {
-    return localStorage.getItem('user-pro') === 'true';
-  }
-
-  function ensureBriefAccess() {
-    const overlay = document.getElementById('paywall-overlay');
-    const titleEl = document.getElementById('paywall-title');
-    const descEl = document.getElementById('paywall-desc');
-
-    if (!isLoggedIn()) {
-      if (titleEl) titleEl.textContent = '登录后使用总结功能';
-      if (descEl) descEl.textContent = '总结页面仅对登录用户开放，请先完成登录。';
-      if (overlay) overlay.classList.add('active');
-      return false;
-    }
-
-    if (!isProUser()) {
-      if (titleEl) titleEl.textContent = '升级为付费用户解锁总结功能';
-      if (descEl) descEl.textContent = '总结页面仅对已付费用户开放，请先完成付费开通。';
-      if (overlay) overlay.classList.add('active');
-      return false;
-    }
-
-    return true;
-  }
-
   window.showView = function(viewId) {
-    if (viewId && viewId.indexOf('brief-') === 0) {
-      if (!ensureBriefAccess()) {
-        return;
-      }
-    }
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     
@@ -1126,84 +1492,22 @@
     tab.addEventListener('click', () => showView(tab.dataset.view));
   });
 
-  // 登录 & 付费弹窗逻辑
-  (function setupPaywall() {
-    const overlay = document.getElementById('paywall-overlay');
-    const btnLogin = document.getElementById('btn-login');
-    const btnUpgrade = document.getElementById('btn-upgrade');
-    const btnClose = document.getElementById('btn-paywall-close');
-    const descEl = document.getElementById('paywall-desc');
-
+  // 点击弹窗空白处关闭 AI 设置
+  (function setupAiSettingsOverlayClose() {
+    const overlay = document.getElementById('ai-settings-overlay');
     if (!overlay) return;
-
-    function hideOverlay() {
-      overlay.classList.remove('active');
-    }
-
-    if (btnLogin) {
-      btnLogin.addEventListener('click', () => {
-        localStorage.setItem('user-logged-in', 'true');
-        if (descEl) {
-          descEl.textContent = '已登录，请继续完成付费开通以解锁总结功能。';
-        }
-      });
-    }
-
-    if (btnUpgrade) {
-      btnUpgrade.addEventListener('click', () => {
-        if (!isLoggedIn()) {
-          if (descEl) {
-            descEl.textContent = '请先登录账号，再完成付费开通。';
-          }
-          return;
-        }
-        localStorage.setItem('user-pro', 'true');
-        hideOverlay();
-        alert('已开通总结功能权限，重新点击导航中的总结页面即可使用。');
-      });
-    }
-
-    if (btnClose) {
-      btnClose.addEventListener('click', hideOverlay);
-    }
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) window.closeAiSettings();
+    });
   })();
 
   // ══════════════════════════════════════════════════
   // AI GENERATION
   // ══════════════════════════════════════════════════
-  // 检查是否在24小时内已调用过API
-  function canCallApi(type) {
-    const lastCallTime = localStorage.getItem(`brief-${type}-lastCall`);
-    if (!lastCallTime) return true;
-    
-    const hoursSinceLastCall = (Date.now() - parseInt(lastCallTime)) / (1000 * 60 * 60);
-    return hoursSinceLastCall >= 24;
-  }
-  
-  // 获取距离下次可用的剩余时间
-  function getTimeUntilNextCall(type) {
-    const lastCallTime = localStorage.getItem(`brief-${type}-lastCall`);
-    if (!lastCallTime) return null;
-    
-    const msUntilNext = parseInt(lastCallTime) + (24 * 60 * 60 * 1000) - Date.now();
-    if (msUntilNext <= 0) return null;
-    
-    const hours = Math.floor(msUntilNext / (1000 * 60 * 60));
-    const minutes = Math.floor((msUntilNext % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}小时${minutes}分钟`;
-  }
-
   window.generateBrief = async function(type) {
     const btn = document.querySelector(`#view-brief-${type} .btn-generate`);
     const status = document.getElementById(`status-${type}`);
     const display = document.getElementById(`display-${type}`);
-    
-    // 检查24小时限制
-    if (!canCallApi(type)) {
-      const timeLeft = getTimeUntilNextCall(type);
-      status.textContent = `⏳ 每日限用1次，距离下次可用还有 ${timeLeft}`;
-      return;
-    }
     
     // Start loading
     btn.classList.add('loading');
@@ -1218,14 +1522,27 @@
     const prompt = prompts[type].replace('{{date}}', dateStr);
 
     try {
-      const response = await fetch(API_URL, {
+      const cfg = ensureAiSettings();
+      if (!cfg) {
+        display.classList.remove('streaming');
+        display.classList.add('empty');
+        display.textContent = '⚙️ 请先在设置中填写 API Key / Base URL / 模型名称。';
+        status.textContent = '等待配置...';
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        return;
+      }
+
+      const apiUrl = buildChatCompletionsUrl(cfg.baseUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`
+          'Authorization': `Bearer ${cfg.apiKey}`
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
+          model: cfg.model,
           messages: [
             { role: 'system', content: '你是一个专业的 AI 资讯编辑，擅长生成简洁、专业的内容摘要。' },
             { role: 'user', content: prompt }
@@ -1272,14 +1589,11 @@
 
       // Done
       display.classList.remove('streaming');
-      status.textContent = '✅ 生成完成！内容已自动保存（24小时后可再次生成）';
+      status.textContent = '✅ 生成完成！内容已自动保存（稍后可再次生成）';
       
       // Save to localStorage
       const today2 = new Date().toISOString().split('T')[0];
       localStorage.setItem(`brief-${type}-${today2}`, content);
-      
-      // 记录本次调用时间
-      localStorage.setItem(`brief-${type}-lastCall`, Date.now().toString());
 
     } catch (error) {
       display.classList.remove('streaming');
@@ -1303,7 +1617,7 @@
     if (el) el.textContent = dateStr;
   });
 
-  // Load cached content and check rate limit status
+  // Load cached content
   const today2 = new Date().toISOString().split('T')[0];
   ['wx', 'nl', 'pod', 'yt'].forEach(type => {
     const cached = localStorage.getItem(`brief-${type}-${today2}`);
@@ -1313,18 +1627,7 @@
       const display = document.getElementById(`display-${type}`);
       display.classList.remove('empty');
       display.textContent = cached;
-      
-      // 检查是否仍在限制期内
-      if (!canCallApi(type)) {
-        const timeLeft = getTimeUntilNextCall(type);
-        status.textContent = `✅ 已加载今日缓存（${timeLeft}后可再次生成）`;
-      } else {
-        status.textContent = '✅ 已加载今日缓存';
-      }
-    } else if (!canCallApi(type)) {
-      // 无缓存但在限制期内（可能是手动清除了缓存）
-      const timeLeft = getTimeUntilNextCall(type);
-      status.textContent = `⏳ 每日限用1次，距离下次可用还有 ${timeLeft}`;
+      status.textContent = '✅ 已加载今日缓存';
     }
   });
 </script>
